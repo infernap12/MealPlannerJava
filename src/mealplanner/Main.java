@@ -7,6 +7,7 @@ import java.util.Scanner;
 
 public class Main {
     static MealDAOImpl mealDAO;
+
     public static void main(String[] args) {
         try {
             Database.initDB();
@@ -95,11 +96,7 @@ public class Main {
             }
 
         }
-        try {
-            Database.addMeal(new Meal(999, category, name, new ArrayList<>(List.of(arr))));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        mealDAO.insert(new Meal(999, category, name, new ArrayList<>(List.of(arr))));
         System.out.println("The meal has been added!");
     }
 

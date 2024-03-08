@@ -2,7 +2,6 @@ package mealplanner;
 
 
 import java.sql.*;
-import java.util.ArrayList;
 
 public class Database {
 
@@ -45,7 +44,8 @@ public class Database {
                 postgresConnection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
                 postgresConnection.setAutoCommit(true);
             }
-        } catch (SQLException ignored){}
+        } catch (SQLException ignored) {
+        }
         return postgresConnection;
     }
 
@@ -55,29 +55,6 @@ public class Database {
         } catch (SQLException e) {
             System.out.println("Whoops, db didnt like being asked to close");
             System.out.println(e.getMessage());
-        }
-    }
-
-    public static void insert(String statement) {
-
-    }
-
-    public static void addMeal(Meal meal) throws SQLException {
-        PreparedStatement ps = postgresConnection.prepareStatement("INSERT INTO meals(meal_id, category, meal) " +
-                                                                   "VALUES (?, ?, ?) ");
-
-        int meal_id = hsIsRWorded("meal_id");
-        ps.setInt(1, meal_id);
-        ps.setString(2, meal.category());
-        ps.setString(3, meal.name());
-        ps.execute();
-        PreparedStatement ps2 = postgresConnection.prepareStatement("INSERT INTO ingredients(ingredient_id, meal_id, ingredient) " +
-                                                                    "VALUES (?, ?, ?);");
-        for (String ingredient : meal.ingredients()) {
-            ps2.setInt(1, hsIsRWorded("ingredient_id"));
-            ps2.setInt(2, meal_id);
-            ps2.setString(3, ingredient);
-            ps2.execute();
         }
     }
 
