@@ -2,13 +2,15 @@ package mealplanner;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
+    static MealDAOImpl mealDAO;
     public static void main(String[] args) {
         try {
             Database.initDB();
+            mealDAO = new MealDAOImpl();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -38,11 +40,7 @@ public class Main {
                 System.out.println("Wrong meal category! Choose from: breakfast, lunch, dinner.");
                 continue;
             }
-            try {
-                list = Database.fetch(input);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+            list = mealDAO.fetchByCategory(input);
             if (list.isEmpty()) {
                 System.out.println("No meals found.");
                 return;
@@ -95,9 +93,10 @@ public class Main {
             } else {
                 System.out.println("Wrong format. Use letters only!");
             }
+
         }
         try {
-            Database.addMeal(new Meal(999, category, name, arr));
+            Database.addMeal(new Meal(999, category, name, new ArrayList<>(List.of(arr))));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -106,9 +105,7 @@ public class Main {
 
     public static void printMeal(Meal meal) {
         System.out.println();
-        System.out.println("Name: " + meal.name());
-        System.out.println("Ingredients:");
-        Arrays.stream(meal.ingredients()).iterator().forEachRemaining(System.out::println);
+        System.out.println(meal.toString());
     }
 }
 
