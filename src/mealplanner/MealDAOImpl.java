@@ -7,7 +7,7 @@ public class MealDAOImpl implements genericDAO<Meal> {
     IngredientDAOImpl ingredientDAO = new IngredientDAOImpl();
 
     public ArrayList<Meal> fetchByCategory(String category) {
-        return fetchByList("SELECT * FROM meals WHERE category = " + category);
+        return fetchByList("SELECT * FROM meals WHERE category = '" + category.concat("';"));
     }
 
     @Override

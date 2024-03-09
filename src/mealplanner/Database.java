@@ -25,14 +25,9 @@ public class Database {
     public static void initDB() throws SQLException {
         postgresConnection = getCon();
 
-        PreparedStatement ps = postgresConnection.prepareStatement("CREATE TABLE IF NOT EXISTS meals(" +
-                                                                   "meal_id int PRIMARY KEY, " +
-                                                                   "category VARCHAR NOT NULL, " +
-                                                                   "meal VARCHAR NOT NULL);\n" +
-                                                                   "CREATE TABLE IF NOT EXISTS ingredients(" +
-                                                                   "ingredient_id int PRIMARY KEY, " +
-                                                                   "meal_id INT NOT NULL references meals, " +
-                                                                   "ingredient VARCHAR NOT NULL);\n" +
+        PreparedStatement ps = postgresConnection.prepareStatement("CREATE TABLE IF NOT EXISTS meals(meal_id INT PRIMARY KEY, category VARCHAR NOT NULL, meal VARCHAR NOT NULL);\n" +
+                                                                   "CREATE TABLE IF NOT EXISTS ingredients(ingredient_id INT PRIMARY KEY, meal_id INT NOT NULL REFERENCES meals, ingredient VARCHAR NOT NULL);\n" +
+                                                                   "CREATE TABLE IF NOT EXISTS plan(day TEXT, category TEXT, meal_id INT REFERENCES meals, plan_id SERIAL PRIMARY KEY);\n" +
                                                                    "CREATE SEQUENCE IF NOT EXISTS ingredient_id_seq;\n" +
                                                                    "CREATE SEQUENCE IF NOT EXISTS meal_id_seq;");
         ps.execute();

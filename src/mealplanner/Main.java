@@ -2,32 +2,70 @@ package mealplanner;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
     static MealDAOImpl mealDAO;
+    private static PlanDAOImpl planDAO;
 
     public static void main(String[] args) {
         try {
             Database.initDB();
             mealDAO = new MealDAOImpl();
+            planDAO = new PlanDAOImpl();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         Scanner scanner = new Scanner(System.in);
         while (true) {//menu
-            System.out.println("What would you like to do (add, show, exit)?");
+            System.out.println("What would you like to do (add, show, plan, exit)?");
             String choice = scanner.nextLine();
             switch (choice) {
                 case "add" -> add();
                 case "show" -> show();
+                case "plan" -> plan();
                 case "exit" -> {
                     Database.close();
                     System.out.println("Bye!");
                     System.exit(0);
                 }
             }
+        }
+    }
+
+    private static void plan() {
+        Scanner scanner = new Scanner(System.in);
+        String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+        String[] categories = {"Breakfast", "Lunch", "Dinner"};
+        for (String day : days) {
+            System.out.println(day);
+            for (String category : categories) {
+                ArrayList<Meal> list = mealDAO.fetchByCategory(category.toLowerCase());
+                Collections.sort(list);
+                list.forEach(e -> System.out.println(e.name()));
+                System.out.printf("Choose the %s for %s from the list above:%n", category.toLowerCase(), day);
+                Meal meal;
+                while (true) {
+                    String choice = scanner.nextLine();
+                    meal = mealDAO.findByName(choice);
+                    if (meal != null) {
+                        break;
+                    }
+                    System.out.println("This meal doesn’t exist. Choose a meal from the list above.");
+                }
+                planDAO.insert(new Plan(day, category, meal.id(), 999));
+            }
+            System.out.printf("Yeah! We planned the meals for %s.%n%n", day);
+        }
+        for (String day : days) {
+            System.out.println(day);
+            for (String category : categories) {
+                Plan plan = planDAO.findByDayCat(day, category);
+                System.out.println("%s: %s".formatted(category, mealDAO.findById(plan.meal_id()).name()));
+            }
+            System.out.println();
         }
     }
 
