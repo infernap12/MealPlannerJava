@@ -1,10 +1,9 @@
 package mealplanner;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
     static MealDAOImpl mealDAO;
@@ -20,12 +19,13 @@ public class Main {
         }
         Scanner scanner = new Scanner(System.in);
         while (true) {//menu
-            System.out.println("What would you like to do (add, show, plan, exit)?");
+            System.out.println("What would you like to do (add, show, plan, save, exit)?");
             String choice = scanner.nextLine();
             switch (choice) {
                 case "add" -> add();
                 case "show" -> show();
                 case "plan" -> plan();
+                case "save" -> save();
                 case "exit" -> {
                     Database.close();
                     System.out.println("Bye!");
@@ -33,6 +33,38 @@ public class Main {
                 }
             }
         }
+    }
+
+    private static void save() {
+        ArrayList<Plan> plans = planDAO.fetchAll();
+        if (plans.isEmpty()) {
+            System.out.println("Unable to save. Plan your meals first.");
+            return;
+        }
+        HashMap<String, Integer> ingredients = new HashMap<>();
+        ArrayList<Meal> meals = new ArrayList<>();
+        for (Plan plan : plans) {
+            meals.add(mealDAO.findById(plan.meal_id()));
+        }
+        for (Meal meal : meals) {
+            for (String s : meal.ingredients()) {
+                if (ingredients.containsKey(s)) {
+                    ingredients.put(s, ingredients.get(s) + 1);
+                } else ingredients.put(s, 1);
+            }
+        }
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Input a filename:");
+        String fileName = scanner.nextLine();
+        StringBuilder sb = new StringBuilder();
+        ingredients.forEach((k, v) -> sb.append(k).append(v > 1 ? " x%d\n".formatted(v) : "\n"));
+        try (FileWriter fw = new FileWriter(fileName)) {
+            fw.write(sb.toString());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("Saved!");
+        //iterate the hashmap and if more than one, print not just name but x the count
     }
 
     private static void plan() {
@@ -63,7 +95,7 @@ public class Main {
             System.out.println(day);
             for (String category : categories) {
                 Plan plan = planDAO.findByDayCat(day, category);
-                System.out.println("%s: %s".formatted(category, mealDAO.findById(plan.meal_id()).name()));
+                System.out.printf("%s: %s%n", category, mealDAO.findById(plan.meal_id()).name());
             }
             System.out.println();
         }
